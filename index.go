@@ -1,12 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
+	"math/rand"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -19,6 +22,9 @@ var (
 func init() {
 	flag.StringVar(&Token, "t", "", "Bot Token")
 	flag.Parse()
+
+	// Seed random
+	rand.Seed(time.Now().Unix())
 }
 
 func main() {
@@ -58,11 +64,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	modifiedContent := m.Content
-
-	if strings.Contains(m.Content, "@someone") {
-		modifiedContent = strings.Replace(m.Content, "@someone", "@someone", 1)
-	}
+	modifiedContent := strings.Replace(m.Content, "<@"+s.State.User.ID+">", "@someone", -1)
 
 	split := strings.Split(modifiedContent, " ")
 
@@ -81,7 +83,36 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if strings.Contains(modifiedContent, "@someone") {
-		fmt.Print(modifiedContent)
-		s.ChannelMessageSend(m.ChannelID, strings.Replace(modifiedContent, "@someone", "bot test", 1))
+		channel, err := s.Channel(m.ChannelID)
+		if err != nil { // Couldn't find channel
+			fmt.Print(err)
+			return
+		}
+
+		users := channel.Recipients
+		if len(users) < 1 {
+			fmt.Print("No users")
+			return
+		}
+
+		// Pick a random user
+		user := users[rand.Intn(len(users))]
+		nick := user.Username
+
+		member, err := s.State.Member(channel.GuildID, user.ID)
+		// Get nick if it exists
+		if err == nil && member.Nick != "" {
+			nick = member.Nick
+		}
+
+		var buffer bytes.Buffer
+
+		buffer.WriteString("@someone ")
+		/// magic
+		buffer.WriteString("***(")
+		buffer.WriteString(nick)
+		buffer.WriteString(")***")
+
+		s.ChannelMessageSend(m.ChannelID, strings.Replace(modifiedContent, "@someone", buffer.String(), 1))
 	}
 }
