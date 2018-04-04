@@ -19,6 +19,20 @@ var (
 	Token string
 )
 
+// Magic -al constants
+var Magic = [...]string{
+	`¯(°_o)/¯`,
+	`¯\_(ツ)_/¯`,
+	`ヽ༼ ಠ益ಠ ༽ﾉ`,
+	`(∩ ͡° ͜ʖ ͡°)⊃━☆ﾟ. o ･ ｡ﾟ`,
+	`(◕‿◕✿)`,
+	`(∩ ͡° ͜ʖ ͡°)⊃━✿✿✿✿✿✿`,
+	`(╯°□°）╯︵ ┻━┻`,
+	`༼ つ ◕_◕ ༽つ`,
+	`(⁄ ⁄•⁄ω⁄•⁄ ⁄)`,
+	`ಠ_ಠ`,
+}
+
 func init() {
 	flag.StringVar(&Token, "t", "", "Bot Token")
 	flag.Parse()
@@ -112,11 +126,14 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		var buffer bytes.Buffer
 
 		buffer.WriteString("@someone ")
-		/// magic
-		buffer.WriteString("***(")
+		// Pick a random magic
+		buffer.WriteString(Magic[rand.Intn(len(Magic))])
+		buffer.WriteString(" ***(")
 		buffer.WriteString(nick)
 		buffer.WriteString(")***")
 
 		s.ChannelMessageSend(m.ChannelID, strings.Replace(modifiedContent, "@someone", buffer.String(), 1))
+		// Delete message after modifying it
+		s.ChannelMessageDelete(m.ChannelID, m.ID)
 	}
 }
