@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
@@ -56,13 +57,31 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
-	// If the message is "ping" reply with "Pong!"
-	if m.Content == "ping" {
-		s.ChannelMessageSend(m.ChannelID, "Pong!")
+
+	modifiedContent := m.Content
+
+	if strings.Contains(m.Content, "@someone") {
+		modifiedContent = strings.Replace(m.Content, "@someone", "@someone", 1)
 	}
 
-	// If the message is "pong" reply with "Ping!"
-	if m.Content == "pong" {
-		s.ChannelMessageSend(m.ChannelID, "Ping!")
+	split := strings.Split(modifiedContent, " ")
+
+	if split[0] == "@someone" {
+		// Bot commands
+		switch strings.ToLower(split[1]) {
+		case "ping":
+			// Respond to ping messages
+			s.ChannelMessageSend(m.ChannelID, "help i've fallen and i can't get up i need @someone")
+			return
+		case "invite":
+			// Send invite link
+			s.ChannelMessageSend(m.ChannelID, "Invite link: https://discordapp.com/api/oauth2/authorize?client_id="+s.State.User.ID+"&permissions=2048&scope=bot")
+			return
+		}
+	}
+
+	if strings.Contains(modifiedContent, "@someone") {
+		fmt.Print(modifiedContent)
+		s.ChannelMessageSend(m.ChannelID, strings.Replace(modifiedContent, "@someone", "bot test", 1))
 	}
 }
