@@ -89,17 +89,21 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		users := channel.Recipients
-		if len(users) < 1 {
-			fmt.Print("No users")
+		guild, err := s.Guild(channel.GuildID)
+		if err != nil { // Couldn't find guild
+			fmt.Print(err)
 			return
 		}
 
-		// Pick a random user
-		user := users[rand.Intn(len(users))]
-		nick := user.Username
+		members := guild.Members
+		if len(members) < 1 {
+			fmt.Print("No members")
+			return
+		}
 
-		member, err := s.State.Member(channel.GuildID, user.ID)
+		// Pick a random member
+		member := members[rand.Intn(len(members))]
+		nick := member.User.Username
 		// Get nick if it exists
 		if err == nil && member.Nick != "" {
 			nick = member.Nick
