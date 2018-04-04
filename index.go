@@ -91,7 +91,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		case "invite":
 			// Send invite link
-			s.ChannelMessageSend(m.ChannelID, "Invite link: https://discordapp.com/api/oauth2/authorize?client_id="+s.State.User.ID+"&permissions=2048&scope=bot")
+			s.ChannelMessageSend(m.ChannelID, "Invite link: https://discordapp.com/api/oauth2/authorize?client_id="+s.State.User.ID+"&permissions=10240&scope=bot")
 			return
 		}
 	}
