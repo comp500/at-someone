@@ -115,12 +115,21 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		// Pick a random member
-		member := members[rand.Intn(len(members))]
-		nick := member.User.Username
-		// Get nick if it exists
-		if err == nil && member.Nick != "" {
-			nick = member.Nick
+		var nick string
+		for {
+			// Pick a random member
+			member := members[rand.Intn(len(members))]
+			// Ignore bots
+			if member.User.Bot {
+				member = nil
+				continue
+			}
+			nick = member.User.Username
+			// Get nick if it exists
+			if err == nil && member.Nick != "" {
+				nick = member.Nick
+			}
+			break
 		}
 
 		var buffer bytes.Buffer
