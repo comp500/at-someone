@@ -84,14 +84,20 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	if split[0] == "@someone" {
 		// Bot commands
-		switch strings.ToLower(split[1]) {
-		case "ping":
-			// Respond to ping messages
+		if len(split) > 1 {
+			switch strings.ToLower(split[1]) {
+			case "ping":
+				// Respond to ping messages
+				s.ChannelMessageSend(m.ChannelID, "help i've fallen and i can't get up i need @someone")
+				return
+			case "invite":
+				// Send invite link
+				s.ChannelMessageSend(m.ChannelID, "Invite link: https://discordapp.com/api/oauth2/authorize?client_id="+s.State.User.ID+"&permissions=10240&scope=bot")
+				return
+			}
+		} else {
+			// Treat as ping message
 			s.ChannelMessageSend(m.ChannelID, "help i've fallen and i can't get up i need @someone")
-			return
-		case "invite":
-			// Send invite link
-			s.ChannelMessageSend(m.ChannelID, "Invite link: https://discordapp.com/api/oauth2/authorize?client_id="+s.State.User.ID+"&permissions=10240&scope=bot")
 			return
 		}
 	}
